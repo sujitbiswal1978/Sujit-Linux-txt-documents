@@ -1,0 +1,121 @@
+>>>What is NTP:
+
+  > The full form of NTP is “Network Time Protocol,” which has been one of the most authentic ways
+  > to synchronize the clock over a network. If your system uses NTP, you don’t need to check
+  > and set your time manually. It automatically updates the clock every time the device reboots.
+  > It is an extremely accurate way to update the clock of your device.
+  > Since the internet is everywhere, NTP is being used by every modern computer.
+  
+ >>Profile for NTP:
+ 
+ > package name : ntp
+ > service/daemon : ntpd
+ > configfile : /etc/ntp.conf
+ > port number : 123
+ 
+ >> COMMANDS TO CONFIGURE NTP IN SERVER MACHINE
+ 
+  #yum install epel-release -y
+  
+  #yum install ntp -y
+
+  #vim /etc/ntp.conf
+  
+ >>now comment the default ntp servers given in the config file as shown below.From line number
+   21 to 24.
+    
+	
+          #server 0.centos.pool.ntp.org iburst
+          #server 1.centos.pool.ntp.org iburst
+          #server 2.centos.pool.ntp.org iburst
+          #server 3.centos.pool.ntp.org iburst
+ 
+ >> now visit to this site www.pool.ntp.org and select the ASIA region now scrool down and
+    choose country INDIA. Now copy the specific pool zones and paste in the cofig file of your 
+	server machine,below the default server ip from line number 25 to 28,as shown below.
+	
+	           server 0.in.pool.ntp.org
+               server 1.in.pool.ntp.org
+               server 2.in.pool.ntp.org
+               server 3.in.pool.ntp.org
+			   
+ >>In case if you don't have internet connection in your machine ,then you have to give
+  the local ip of of NTP server. And also you have to give the fudge, it will set a priority
+  according to stratum value from 1 to 6. these values will sync the ntp local clock to the 
+  server when there is no internet connection. Now add this below line in your config file
+  in line number 29&30.
+  
+               server 127.127.1.0
+               fudge 127.127.1.0 stratum 6
+
+  >> Now we have to allow some clients to login to our NTP server,for that we have to edit 
+     the line no.17(restrict).In that line we have to give the client machine ip.we can give 
+     multiple ip here. 
+
+     	  restrict 172.16.16.101 mask 255.255.255.0 nomodify notrap
+
+  >> If you want to check the NTP log file,then add the log file location into the config file
+     in the last line.
+
+                logfile /var/log/ntp.log
+        :wq	
+
+  >> Now start the ntp service/daemon
+       
+      #systemctl enable --now ntpd
+	  
+      #systemctl status ntpd
+	  
+ >> Now check the Ip from where your NTP serever is syncying the time. 
+          
+	  #ntpq -p 
+	  
+	  
+	  NOW SET-UP NTP IN CLIENT
+	  
+	  #yum install epel-release -y
+	  
+	  #yum install ntp -y
+	  
+	  #vim /etc/ntp.conf
+	  
+ >> Now comment the default server IP, from line number 21 to 24.
+ 
+          #server 0.centos.pool.ntp.org iburst
+          #server 1.centos.pool.ntp.org iburst
+          #server 2.centos.pool.ntp.org iburst
+          #server 3.centos.pool.ntp.org iburst
+ 
+ 
+ >> Now give the server ip on which you have configured ntp. Add a line below 24th line 
+    as shown below.
+	
+	  server 172.16.16.100
+	  
+	  :wq
+
+ >> Now start the service 
+   
+     #systemctl enable --now ntpd
+  
+     #systemctl status ntpd
+  
+  >> Now check the client machine time 
+   
+      #timedatectl
+	  
+ >> Also check the time in server machine
+ 
+      #timedatectl
+	  
+ >> Now go to the client machine and sync the time of the server by using the server ip.
+ 
+      #ntpdate -u 172.16.16.100
+	  
+ >> Now check the time ,it will same as the servers time.
+
+      #timedatectl 
+  
+  
+   
+  

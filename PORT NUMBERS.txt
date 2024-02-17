@@ -1,0 +1,75 @@
+<<PORT NUMBERS>>
+
+(1) FTP :- data transfer - 20
+              connection - 21
+			  
+(2) SSH :- 22
+
+(3) TELNET :- 23
+
+(4) Send mail or SMTP :- 25
+
+(5) DNS :- 53
+
+(6) DHCP :- server - 67
+            client - 68
+
+(7) IMAP :- 143
+
+(8) POP3 :- 110
+
+(9) TFTP :- 69
+
+(10) Samba shared name verification :- 137
+           connection establishment :- 138
+                      data transfer :- 139
+                     authentication :- 445					  
+(11) MARIADB / MYSQL :- 3306
+
+(12) POSTGRES / PSQL :- 5432
+
+(13) HTTP / NGINX / HAPROXY :- 80
+
+(14) HTTPS :- 443
+
+(15) NTP :- 123 
+
+(16) LDAP :- 389
+
+(17) LOG server :- 514 (syslog)
+
+(18) IDAPS (IDAP + SSL) :- 636
+
+(19) NFS :- Server - 2049
+            Client - 1024
+			
+(20) SQUID :- 3128 (Proxy Server) 
+
+(21) ISCSI :- 3260
+
+(22) Kerberos :- 88
+
+(23) IMAPS :- 993
+
+(24) POP3S :- 995
+
+(25) TOMCAT / JENKINS :- 8080
+
+(26) SFTP :- 115
+
+(27) TCP Protocol :- 6
+
+(28) UDP Protocol :- 17
+
+(29) ICMP Protocol :- 1
+
+(30) Secure syslog :- 6514
+
+(31) Sonarqube :- 9000
+
+(32) Nexus :- 8081
+
+ *-->> Port number located in - "/etc/services" 
+	# cat /etc/services | grep -as 88
+
+*-->> Protocol numbers are stored inside - "/etc/protocols"	

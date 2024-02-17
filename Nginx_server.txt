@@ -1,0 +1,163 @@
+Nginx Server: 
+=============
+
+
+What is Nginx?
+
+ Ans: >>  Nginx (pronounced ‘engine X’) is an alternative to Apache and is considered to be one of the
+      most popular HTTP web servers in the world. As opposed to Apache, Nginx tends to consume fewer resources 
+      and improves server responsiveness. Its event-driven design is what makes it resource-friendly.
+
+    >> Above all, it allows admins to set up advanced configurations and can deal with a 
+       high load of concurrent connections. 
+       Besides being a good fit for an HTTP web server, Nginx also works as a reverse proxy, load balancer etc ..
+
+
+Profile for Nginx: 
+==================
+
+Configuration file : /etc/nginx/nginx.conf 
+default server document root directory which contains web files : /usr/share/nginx/html 
+Service/daemon : nginx 
+default document root directory : /usr/share/nginx/html 
+Port Number: 80 
+Secure Port Number: 443 
+default index file : index.html 
+
+
+
+*************************
+Global Configuration
+
+>> Global configurations can be tweaked by modifying the main Nginx configuration file located at /etc/nginx/nginx.conf.
+This configuration file is broken down into contexts. By default, you can identify three (3) contexts.
+
+   1> Events are global settings that define how Nginx handles connections in general.
+
+2> HTTP defines how the server handles HTTP and HTTPS connections.
+
+3> Server is defined within the HTTP context. It specifies server ports, document root, etc...
+
+
+Installing Nginx
+=================
+
+If you use a non-root user, then you must have sudo rights and to add to all the commands sudo in front of them.
+
+To install Nginx, add the EPEL repository.
+
+
+
+Now we will install Nginx
+
+By default, Nginx is configured to work with both IPv4 and IPv6 addresses.
+
+ If the last one is not configured on the server, as in my case, then the web server simply will not start. Therefore, we immediately go to the config:
+
+  
+ # vim /etc/nginx/nginx.conf
+
+Find the next line and comment on it, that is, put a # sign at its beginning:
+
+40      #   listen       [::]:80;
+
+##############################
+
+
+ # yum install epel-release -y
+
+ # yum install vim net-tools wget  -y
+
+ #  yum install nginx -y
+
+ # systemctl  enable --now nginx ; systemctl  status nginx
+
+ #  vim  /etc/nginx/nginx.conf 
+
+#Find the next line and comment on it, that is, put a # sign at its beginning:
+
+ 38     server {
+ 39         listen       80;
+ 40      #   listen       [::]:80;
+ 41         server_name  _;
+ 42         root         /usr/share/nginx/html;
+ 43
+ 44         # Load configuration files for the default server block.
+ 45         include /etc/nginx/default.d/*.conf;
+ 46
+ 47         error_page 404 /404.html;
+ 48         location = /404.html {
+ 49         }
+ 50
+ 51         error_page 500 502 503 504 /50x.html;
+ 52         location = /50x.html {
+ 53         }
+ 54     }
+
+
+:wq 
+
+  
+
+
+ # systemctl  restart  nginx
+
+ # nginx -t
+
+ # mkdir -p /var/www/default
+
+ # echo "<h1>My first web page</h1>" > /var/www/default/index.html
+
+ #  cat /var/www/default/index.html
+
+ #  chown -R nginx:nginx /var/www/default/
+
+ #  id nginx
+
+ # vim /etc/nginx/nginx.conf
+
+
+ 38     server {
+ 39         listen       80;
+ 40      #   listen       [::]:80;
+ 41         server_name  _;
+ 42         root         /var/www/default;   
+ 43       #  root         /usr/share/nginx/html;
+	44
+ 45         # Load configuration files for the default server block.
+ 46         include /etc/nginx/default.d/*.conf;
+ 47
+ 48         error_page 404 /404.html;
+ 49         location = /404.html {
+ 50         }
+ 51
+ 52         error_page 500 502 503 504 /50x.html;
+ 53         location = /50x.html {
+ 54         }
+ 55     }
+ 56
+
+
+ #  systemctl  restart nginx
+ 
+# nginx  -t
+
+
+ # firewall-cmd --zone=public --permanent --add-service=http
+
+ # firewall-cmd --zone=public --permanent --add-service=https
+
+ # firewall-cmd --reload
+
+ # curl  localhost
+
+  check in browser also 
+
+  http://<ip_address> 
+
+
+
+###########################
+
+
+https://serverspace.io/support/help/install-and-configure-nginx-on-centos-7/

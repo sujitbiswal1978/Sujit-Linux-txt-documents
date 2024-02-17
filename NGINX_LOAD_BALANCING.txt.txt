@@ -1,0 +1,120 @@
+LOAD BALANCER IN NGINX:-
+==========================
+==> 1st make two web server (httpd/nginx) in two different servers then follow the below ,
+
+STEP-1    [Enter the ip, fqdn and hostname of LOAD BALANCER and the two web servers in the local DNS file]
+=======
+
+[root@node1 ~]# cat /etc/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+127.0.1.1 node1.example.com node1
+172.16.16.100 node1.example.com  node1
+172.16.16.101 worker1.example.com worker1
+172.16.16.102 worker2.example.com worker2
+
+STEP-2   [Install the nginx package , start and enbale the service/Daimon ]
+=======
+
+# yum install nginx -y
+
+# systemctl enable --now nginx
+
+# systemctl status nginx
+
+STEP-3
+=======
+====>> Here we are using the nginx like LOAD BALANCER ,not like webserver so we delete the default index file 
+
+# cd /usr/share/nginx/html/
+# ls
+ 404.html  50x.html  en-US  icons  img  nginx-logo.png  poweredby.png  index.html
+
+# rm -rf index.html      [Remove the index file]
+#ls
+ 404.html  50x.html  en-US  icons  img  nginx-logo.png  poweredby.png
+# cd
+
+STEP-4
+=======
+====>> Now do the changes in the default configuration file of nginx
+
+# vim /etc/nginx/nginx.conf
+                                                      ====================
+38  #   server {                                                         |
+ 39  #       listen       80;                                            |
+ 40  #       listen       [::]:80;                                       |
+ 41  #       server_name  _;                                             |
+ 42  #       root         /usr/share/nginx/html;                         |
+ 43 #                                                                    |
+ 44 #        # Load configuration files for the default server block.    |       COMMENT THESE LINES BECAUSE THESE ARE NOTE REQUIRED FOR                                                                                    
+ 45 #        include /etc/nginx/default.d/*.conf;                        |       LOAD BALANCING THESE ARE REQUIRED FOR WEBHOSTING
+ 46 #                                                                    | 
+ 47 #        error_page 404 /404.html;                                   |
+ 48 #        location = /404.html {                                      |
+ 49 #        }                                                           |
+ 50 #                                                                    |
+ 51 #        error_page 500 502 503 504 /50x.html;                       |
+ 52 #        location = /50x.html {                                      |
+ 53 #        }                                                           |
+ 54 #    }                                                               |
+                                                       ===================
+ 55 
+  [[[[ DO THESE ENTRY FOR LOAD BALANCING HERE 172.16.16.16.101 AND 172.16.16.102 ARE TWO WEBSERVER IP]]]
+ 56 ####################################################################################
+ 57 upstream backend {                                                   
+ 58         server  172.16.16.101;                                       
+ 59         server  172.16.16.102;                                       
+ 60     }                                                                    
+ 61                                                                      
+ 62     server {                                                                  
+ 63         listen      80;                                                        
+ 64                                                                              
+ 65                                                                      
+ 66                                                                      
+ 67         location / {                                                 
+ 68                                                                      
+ 69                 proxy_pass http://backend;                           
+ 70         }                                                            
+ 71 }                                                                    
+ 72                                                                      
+ 73                                                                      
+ 74                                                                      
+ 75 #######################################################################################
+ 76 # Settings for a TLS enabled server.
+ 77 #
+ 78 #    server {
+ 79 #        listen       443 ssl http2;
+ 80 #        listen       [::]:443 ssl http2;
+ 81 #        server_name  _;
+ 82 #        root         /usr/share/nginx/html;
+ 83 #
+ 84 #        ssl_certificate "/etc/pki/nginx/server.crt";
+ 85 #        ssl_certificate_key "/etc/pki/nginx/private/server.key";
+
+:wq
+
+STEP-5
+=======
+===>> Then restart and check status of nginx service
+
+# systemctl restart nginx
+
+# systemctl status nginx
+
+STEP-6
+=======
+===>> check in local machine 
+# curl localhost
+worker1  <content of 1st server>
+
+# curl localhost
+worker2  <content of 2nd server>
+
+====>> We can check in browser through the load balancer ip 
+
+172.16.16.100
+worker1  <content of 1st server>
+
+172.16.16.100
+worker2 <content of 2nd server>

@@ -1,0 +1,193 @@
+LOG MANAGMENT 
+c######################
+
+>> what is logmanagment?
+  
+  >> Log management is the practice of continuously gathering, storing, processing, synthesizing and analyzing data
+     from disparate programs and applications in order to optimize system performance, identify technical issues, 
+	 better manage resources, strengthen security and improve compliance.
+	
+>> What is Log?
+	
+ >>  A log is a computer-generated file that captures activity within the operating system or software applications.
+	 The log file automatically documents any information designed by the system administrators, including: messages,
+	 error reports, file requests and file transfers. 
+	 The activity is also timestamped , 
+	 which helps IT professionals and developers understand what occurred as well as when it happened.
+	
+>> CONFIGURATTION OF LOG MANAGEMENT UPTO RHEL6 >>
+###########################################################
+
+   > Upto RHEL6 the parent process is "INIT". It support "rsyslog" for its log management.
+     A list of log files maintained by "rsyslogd" can be found in the "/etc/rsyslog.conf".
+	 configuration file. Most log files are located in the /var/log/ directory.
+       
+>> PROFILE FOR RSYSLOG >>
+              package name - rsyslog
+			  service/daemon - rsyslog.service
+			  configuration file - /etc/rsyslog.conf
+			  port number - 514
+			  
+			  
+   >> For different logs there is a different log file location in "rsyslog".
+     such as:
+	 	
+     user related logs >> /var/log/secure
+     package related logs >> /var/log/yum.log
+     mail related logs >> /var/log/maillog 
+	 ___________________________________________________________________________________________________________________
+     |   *>> (To send a mail to a user) > echo "message body" | mail -s "subject" <username>                             |
+	 |   To check the mail is sent or not >> #mailq                                                                     |
+	 |	 To see the message subject and body >> #tail -f /var/spool/mail/<username>                                     | 
+	_|___________________________________________________________________________________________________________________|
+	
+   /var/log/messages >>  overall system notifications and messages recorded at system boot.
+                         The folder /var/log/messages contain a variety of messages, 
+						 such as mail, kern, auth, cron, daemon, and so on.
+						 
+  /var/log/boot.log – The boot.log file contains information regarding your system’s start up process .    
+
+                      If your system is having issues booting up or shutting down,
+					  any information regarding this will be stored here.
+					  
+  /var/log/httpd/ – This log is useful, because it stores information related to Apache access and error logs.
+                    If your server is having issues with httpd requests,
+					the system messages addressing this will be located here.
+					
+  /var/log/kern.log – The kern.log file holds all records related to kernel.
+                      If you need to troubleshoot issues related to kernel,
+					  the information you need to do so will be stored here.
+					  
+ >> There are different facilities and priorities in rsyslog to see the priorities,
+
+ There are 23 facilities in rsyslog,the important ones are, 
+    
+   such as: kern --  kernel messages
+            authpriv --  Security/authorization messages
+            mail --  Mail system			
+            local7 -- save boot messages
+            daemon -- System daemons	
+			cron --	Scheduling daemon
+     (*.*)	>> First * refers to all facility and the second * refers to all priority.
+	           we can give all facility and all priority to a directory/log location.
+
+
+ press command // #man journalctl
+    There are 8 priorities. such as : (0)"emerg" , (1)"alert" , (2)"crit" , (3)"err" , (4)"warning" ,(5)"notice"
+	(6)"info" , (7)"debug"(to investigate)
+			   
+ >> COMMANDS TO CREATE A LOG FILE LOCATION AND ADD IN THE "/etc/rsyslog.conf".
+    
+	#vim /etc/rsyslog.conf 
+   
+  > Now add a line like below in the configuration file , To store user related logs in our location.(/var/log/muna)
+  
+  authpriv.*                                        /var/log/muna 
+  wq:
+  
+  #systemctl restart rsyslog.service
+  
+ >> Now create user and check it in "/var/log/muna"
+ 
+    # useradd babuli
+    # cat /var/log/muna
+	
+ >> TO STORE ALL LOGS IN OUR LOCATION,we have to give all priority and all facility to our location "/var/log/muna".
+
+   #vim /etc/rsyslog.conf
+  > Now edit the "var/log/muna" line, like below
+
+  *.*                     /var/log/muna   
+  wq:
+   
+   # systemctl restart rsyslog.service
+    
+ > Now install a package and send a message to a user, and check all the logs in our added location "/var/log/muna".
+
+   #yum install ftp -y
+   # echo "love you dhana" | mail -s "love" babuli
+ 
+   # cat /var/log/muna (it will show all the logs)
+   
+###############################################################################
+___________________________________________________________________________________________________________________
+_>> LOG MANAGEMENT IN RHEL7 AND ONWARDS____________________________________________________________________________|
+    
+  >> After RHEL7 the parent process is changed to "systemd".Systemd introduced a new log management service called "journald".  
+    "systemd" supports both "journald" and "rsyslog".The speciality of journald is all the log are stored under one location,
+    called journalctl.But the logs stored in journalctl are not persistent,(means across reboot the logs will be vanished
+	from journalctl).
+
+ >> PROFILE FOR JOURNALD
+ --------------------------   
+      service/daemon = systemd-journald
+	  configuration file = /etc/systemd/journald.conf
+	  
+   > We can see all logs by the command // #journalctl
+   
+   > If you want to see user logs then follow the below commands
+    
+    #useradd rama
+    
+    #journalctl | grep rama (it will show rama user details with time stamp)
+	
+  >If you want to see the yum log then do the below
+
+    #yum install ftp -y
+	
+	#journalctl | grep ftp (it wiil show the installed package information with time stamp).
+ 
+  >> There are different options of journalctl. we can see all those by the command//
+
+     #journalctl --help
+
+     #journalctl -k  //(To list only kernel logs)
+
+     #journalctl -u (unit type i.e httpd,sshd) //	Lists by specific unit
+
+    #journalctl  -b   // Boots the label offset
+	
+	#journalctl -p  // Filters by log type priority (either name or number)
+	
+	#journalctl -F  // List all values that a specified field takes.
+	
+	#journalctl -o verbose // Logs the verbose output format
+	
+	#journalctl --utc // Time in UTC offset
+	
+    #journalctl --list-boots // To check boot logs per reboot instance(after each reboot there will be a new entry )
+	
+	#journalctl -b -5 // last boot logging instance
+	
+	
+ >> TO MAKE LOGS PERSISTENT //
+ -----------------------------
+ 
+  >>> First we have to make a log location/directory under /var/log.
+  
+       #mkdir /var/log/journal
+	   
+  >> Now, let's give the directory proper permissions journald daemon access.
+    
+      #systemd-tmpfiles --create --prefix /var/log/journal
+
+ >> Now let's tell journald it should store persistent boot logs. lets go to journald cofig file and add our log location.	  
+ 
+     #vim /etc/systemd/journald.conf
+	 
+  >> In the cofiguration file, go to line no 15 uncomment it and make the storage=persistent , like below.
+  
+     [Journal]
+	 Storage=peristent
+	 wq:
+	 
+ >> now to check the log location is persistent or not follow the below commands.
+ 
+     # useradd kalia
+	 
+	 #journalctl | grep kalia
+	 
+	 # init 6
+	 
+	 #journalctl | grep kalia (it will show the user details with time stamp,which means our log location is persistent).
+	 

@@ -1,0 +1,212 @@
+>>> Tomcat: 
+ ===========
+
+ >> Apache Tomcat is a web server and servlet container that is used to serve 
+   Java applications. 
+   Tomcat is an open source implementation of the Java Servlet and JavaServer 
+   Pages technologies, released by the Apache Software Foundation.
+
+http://csci.viu.ca/~barskym/teaching/DM2012/labs/LAB6/SampleApp.html
+
+Profile for Tomcat : 
+=======================
+ Package Name : tomcat  tomcat-webapps tomcat-admin-webapps 
+ configuration file : /etc/tomcat/tomcat.conf 
+ server xml file where ports are defines : /etc/tomcat/server.xml 
+ 
+ >> tomcat user config file : /etc/tomcat/tomcat-users.xml 
+ 
+ >> tomcat default listen port : 8080 
+ 
+ >> tomcat webapps folder where java packages like "war" or "jar" are deployed : 
+  
+   "/usr/share/tomcat/webapps" 
+
+
+  # yum install epel-release vim wget java-1.8.0-openjdk-devel -y
+  # yum install tomcat  tomcat-webapps tomcat-admin-webapps  -y
+  
+  # vim /etc/tomcat/tomcat.conf
+	
+  #Add the following JAVA_OPTS line to the file. 
+
+  #Feel free to change the Xmx and MaxPermSize values—these settings affect 
+   how much memory Tomcat will use:
+	 
+  JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom -Djava.awt.headless=true -Xmx512m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC"
+  :wq 
+   
+    # systemctl  enable  tomcat ; systemctl start tomcat ; systemctl status tomcat 
+	
+	# ss -ntlup | grep 8080  // to check the port is listen or not 
+	
+	// Now go to browser and check tomcat is loading or not 
+	
+	 ex: http://<server_ip>:8080
+	 
+	 
+	
+    # find / -name tomcat-users.xml
+
+    # vim  /etc/tomcat/tomcat-users.xml 
+	
+	// Go to last line and one line above add this 
+
+  <role rolename="manager-gui"/>
+  <role rolename="manager-script"/>
+  <role rolename="manager-jmx"/>
+  <role rolename="manager-status"/>
+  <user username="admin" password="redhat" roles="manager-gui,manager-script,manager-jmx,manager-status"/>
+  <user username="deployer" password="deployer" roles="manager-script"/>
+  <user username="tomcat" password="tomcat" roles="manager-gui"/>
+  
+ :wq
+ 
+  # systemctl restart tomcat 
+  
+  # ss -ntlup | grep 8080 
+  
+  // To change tomcat default port 
+  
+  # # find / -name server.xml.
+  
+  /etc/tomcat/server.xml
+
+  # vim /etc/tomcat/server.xml 
+  
+        <Connector port="8089" protocol="HTTP/1.1"   // To change in this line 
+                 connectionTimeout="20000"
+                 redirectPort="8443" />
+ 
+ :wq
+
+ # systemctl restart tomcat 
+ 
+ # ss -ntlup | grep 8089 
+ 
+ 
+ # wget http://csci.viu.ca/~barskym/teaching/DM2012/labs/LAB6/Lab6A.war 
+ 
+# find   / -iname  webapps 
+
+# cp Lab6A.war /usr/share/tomcat/webapps/
+
+# cd /usr/share/tomcat/webapps/ 
+
+# ls  -l 
+
+// Now go to broswer and check http://<ip address>:<port> 
+
+
+ https://github.com/AKSarav/SampleWebApp/raw/master/dist/SampleWebApp.war
+#########################################################################################
+######################################################################################
+Another way to install tomcat using tomcat zip file 
+:: APACHE TOMCAT ::
+====================
+==>> Apache Tomcat is a free and open-source implementation of the Java Servlet, JavaServer Pages, Java Expression Language 
+    and WebSocket technologies. Tomcat provides a "pure Java" HTTP web server environment in which Java code can run.
+	
+==> Apache Tomcat is an open-source web server that is designed to serve Java web pages.
+   It is widely deployed and powers various mission-critical web applications around the world.
+   
+
+Steps To configure Apache Tomcat:
+=================================
+
+ # sudo yum install epel-release -y
+ 
+ # sudo yum update -y && sudo reboot 
+ 
+ Install Java 1.8 / 11 version 
+ -----------------------------
+ 
+ # yum -y install wget vim java-1.8.0-openjdk.x86_64 // Installaing Java Package 
+ 
+ # java -version // checking the java version  
+ 
+ # mkdir /opt/tomcat 
+
+ # useradd -s /bin/nologin  -d /opt/tomcat tomcat
+ 
+ # cd /opt/tomcat/
+ 
+ # wget  https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.65/bin/apache-tomcat-9.0.65.tar.gz --no-check-certificate
+ 
+ # ls -l 
+ 
+ # tar -xvzf apache-tomcat-9.0.65.tar.gz
+ 
+ # mv apache-tomcat* tomcat9
+ 
+ # cd tomcat9/bin/
+ 
+ # ./startup.sh 
+ 
+ # ss -ntlup | grep 8080 
+
+ // check in browser  http://ipaddress:8080 
+
+  # find  / -iname tomcat-users.xml 
+
+ # vim /opt/tomcat/tomcat9/conf/tomcat-users.xml 
+
+  Go to last line and one line above add this 
+
+  <role rolename="manager-gui"/>
+  <role rolename="manager-script"/>
+  <role rolename="manager-jmx"/>
+  <role rolename="manager-status"/>
+  <user username="admin" password="admin" roles="manager-gui,manager-script,manager-jmx,manager-status"/>
+  <user username="deployer" password="deployer" roles="manager-script"/>
+  <user username="tomcat" password="redhat123" roles="manager-gui"/>
+  
+ :wq
+
+ # cd /opt/tomcat/tomcat9/bin/  
+ 
+ # ./shutdown.sh // Tomcat shutdown 
+
+ # ./startup.sh 
+
+>> Lets check in broswer 
+
+ # firefox http://localhost:8080 
+
+ // click on mamanger-app it will ask username and password 
+
+
+// To change tomcat default port  
+
+ # find  / -iname server.xml
+ # vim  /opt/tomcat/tomcat9/conf/server.xml
+
+ # 
+ 
+ # cd /opt/tomcat/tomcat9/bin/  
+ 
+ # ./shutdown.sh // Tomcat shutdown 
+
+ # ./startup.sh  
+ 
+ # pwd 
+ /root 
+
+# wget http://csci.viu.ca/~barskym/teaching/DM2012/labs/LAB6/Lab6A.war 
+ 
+# find   / -iname  webapps 
+
+# cp Lab6A.war  /opt/tomcat/tomcat9/webapps/ 
+
+# cd /opt/tomcat/tomcat9/webapps/ 
+
+# ls 
+
+// Now go to browser and check 
+
+ http://<ipaddress>:8080/Lab6A 
+ 
+
+ 
+ 
+ https://downloads.apache.org/tomcat/tomcat-9/v9.0.52/bin/apache-tomcat-9.0.52.tar.gz

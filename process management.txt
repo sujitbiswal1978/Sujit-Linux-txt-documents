@@ -1,0 +1,304 @@
+Process Management: 
+=====================
+Q> What  is  process in linux ?
+
+Ans:  A process is an  active (running) instance of a program . 
+
+> In Linux every running process is given a PID or Process ID Number.
+This PID is how to identifies a particular process.
+
+ >> To manage processes in linux ps,top command is used . 
+ 
+  
+
+>> "systemd" is the first process started by a PID of 1 in Linux. 
+
+ # pidof systemd  // To check id 
+ 
+ # pgrep systemd 
+ 
+>> Types of Processes :
+
+There are fundamentally two types of processes in Linux:
+
+  >> Foreground processes: 
+
+    (also referred to as interactive processes) 
+  
+  –> these are initialized and controlled through a terminal session.
+	 In other words, there has to be a user connected to the system 
+	 to start such processes; they haven’t started automatically 
+	 as part of the system functions/services.
+ 
+ >> Background processes: 
+ 
+   (also referred to as non-interactive/automatic processes)
+    – These are processes not connected to a terminal; 
+      they don’t expect any user input.
+ 
+ `
+  Q > Whats a job in Linux ? 
+
+  Ans: A job is a process that the shell manages. 
+  Each job is assigned a sequential job ID.  
+
+ >> Basic CentOS Process and Job Management in CentOS : 
+ ========================================================
+  >> When working with processes in Linux it is important to know
+  how basic foreground and background processes is performed
+  at the command line.
+
+
+ fg − Brings the process to the foreground
+
+ bg − Moves the process to the background
+
+ jobs − List of the current processes attached to the shell
+
+ ctrl+z − (Control + z) key combination to sleep the current process
+
+ & − Starts the process in the background .
+ 
+ 
+ # jobs // To check  running process in shell 
+ 
+ 
+ # sleep 10   // To start a  process in  foreground 
+
+ # sleep 20 & // To start a process in background . 
+
+ # jobs  // To check 
+
+ # sleep 100 & // To start a process in background 
+
+ #  jobs  // to check 
+
+ # fg <Job_id> 
+
+  press ctrl+z to stop the  process 
+ 
+>> nohup :
+----------
+ 
+ >> When working from a shell or terminal, it is worth noting that by default all
+ the processes and jobs attached to the shell will terminate 
+ when the shell is closed or the user logs out.
+ When using nohup the process will continue to run if the user logs out
+ or closes the shell to which the process is attached.
+ 
+ # useradd  kalia 
+ 
+ # su  - kalia 
+ 
+ $ nohup ping google.com & 
+ 
+ $ exit 
+ 
+ # ps  -au // To check all user process 
+ 
+ # cat  /home/kalia/nohup.out 
+ 
+ # cat /home/kalia/nohup.out | wc -l // Check  it is keep on increasing .
+ 
+ # ps  -au  
+ 
+ # kill -9 <pid> 
+ 
+ 
+ ps Command : 
+ ------------
+>> Report a snapshot of the current processes.
+ The ps command is commonly used by administrators to investigate
+ snapshots of a specific process. 
+ ps is commonly used with grep to filter out a specific process to analyze.
+ 
+ # ps axw | grep python // to check all the process releted python  
+
+>> Following are the most common command line switches used with ps.
+
+Switch	Action
+-a	    Excludes constraints of only the reporting 
+        processes for the current user 
+		
+-x	    Shows processes not attached to a tty or shell
+-w	    Formats wide output display of the output
+-e	    Selects all processes
+-o	    User-defined formatted output
+-u	    Shows all processes by a specific user
+-C	    Shows all processes by name or process id
+--sort	Sorts the processes by definition 
+ 
+ 
+ ----------------------
+ PROCESS STATE CODES
+       Here are the different values that the s, stat and state output specifiers (header "STAT" or "S") will
+       display to describe the state of a process:
+
+               D    uninterruptible sleep (usually IO)
+               R    running or runnable (on run queue)
+               S    interruptible sleep (waiting for an event to complete)
+               T    stopped by job control signal
+               t    stopped by debugger during the tracing
+               W    paging (not valid since the 2.6.xx kernel)
+               X    dead (should never be seen)
+               Z    defunct ("zombie") process, terminated but not reaped by its parent
+
+       For BSD formats and when the stat keyword is used, additional characters may be displayed:
+
+               <    high-priority (not nice to other users)
+               N    low-priority (nice to other users)
+               L    has pages locked into memory (for real-time and custom IO)
+               s    is a session leader
+               l    is multi-threaded (using CLONE_THREAD, like NPTL pthreads do)
+               +    is in the foreground process group
+
+
+>> See all the processes by user root and format, displaying the custom output −
+
+# ps -u root -o pid,uname,comm // To check  
+PID USER COMMAND
+5802 root gnome-keyring-d
+5812 root gnome-session
+5819 root dbus-launch
+5820 root dbus-daemon
+5888 root gvfsd
+5893 root gvfsd-fuse
+5980 root ssh-agent
+5996 root at-spi-bus-laun
+
+Q> What are the process states in Linux?
+
+ >> The following are the process states:
+
+1. Running: This is a state where a process is either in running or ready
+   to run.
+
+2. Interruptible(sleep): This state is a blocked state of a process 
+   which awaits for an event or a signal from another process .
+   
+3. Uninterruptible(sleep): It is also a blocked state. The process is forced to halt
+   for certain condition that a hardware status is waited and a signal 
+   could not be handled.
+
+4. Stopped: Once the process is completed, this state occurs.
+   This process can be restarted
+
+5. Zombie: Is a dead process, the process will be terminated 
+   and the information will still be available in the process table.
+
+6. Orphan Processes : 
+>> Orphan processes are those processes that are still running even though 
+  their parent process has terminated or finished. 
+
+>> A process can be orphaned intentionally or unintentionally. 
+ 
+ 
+Q>  What is Daemons ? 
+
+Ans: 
+
+ >> These are special types of background processes that start at 
+    system startup and keep running forever as a service; they don’t die. 
+	They are started as system tasks (run as services), spontaneously. 
+
+------------------------	
+>> And a program is identified by its process ID (PID) as well as it’s parent
+ processes ID (PPID), therefore processes can further be categorized into:
+
+  >> Parent processes – 
+      These are processes that create other processes during run-time.
+
+  >> Child processes –
+      These processes are created by other processes during run-time. 
+
+	  
+>> top Command: 
+  ------------
+ >> The top program provides a dynamic real-time view of a running
+       system.  It can display system summary information as well as a
+       list of processes or threads currently being managed by the Linux
+       kernel. 
+
+  #  top 
+
+  As a default, percentages for these individual categories are
+       displayed.  Where two labels are shown below, those for more
+       recent kernel versions are shown first.
+           us, user    : time running un-niced user processes
+           sy, system  : time running kernel processes
+           ni, nice    : time running niced user processes
+           id, idle    : time spent in the kernel idle handler
+           wa, IO-wait : time waiting for I/O completion
+           hi : time spent servicing hardware interrupts
+           si : time spent servicing software interrupts
+           st : time stolen from this vm by the hypervisor
+
+
+
+ # top  
+
+ >> kill command in Linux
+ -------------------------
+ 
+>> kill command in Linux (located in /bin/kill), 
+  is a built-in command which is used to terminate processes manually.
+  kill command sends a signal to a process which terminates the process.
+  If the user doesn’t specify any signal which is to be sent along 
+  with kill command then default TERM signal is sent that terminates 
+  the process.
+ 
+>> The kill command sends a signal to specified processes or process groups,
+ causing them to act according to the signal. 
+ When the signal is not specified, it defaults to -15 (-TERM).
+
+>> The most commonly used signals are:
+
+1 (SIGHUP) - Reload a process.
+9 (SIGKILL) - Abruptly Kill a process.
+15 (SIGTERM) - Gracefully stop a process.
+
+ # kill -l // to list all the processes . 
+
+ # kill -9 <pid> // to kill a process using process id 
+
+ # pkill <process_name> // to kill a process using name . 
+
+ 
+ >> Nice & Renice Command : 
+---------------------------
+
+>> The nice command configures the priority of a Linux process before 
+   it is started. Once started, you cannot change the priority using 
+   the nice command. This is where the renice command comes in. 
+   The renice command sets the priority of an already running process. 
+
+>> Priority Values in Linux :
+------------------------------
+ 
+>> In Linux systems, there are a total of 140 priorities with 
+a nice value that ranges from -20 to +19 where +19 represents 
+the lowest priority and -20 the highest priority .
+
+>> By default, any Linux process created by a user has a nice value of 0 
+   
+The nice and renice command allows users to change the priority of the processes in a Linux system
+ 
+	  
+>> To check  default nice value 
+----------------------------------
+# nice   
+
+>> to set  niceness value to a command  .
+------------------------------------------
+
+# nice -19 cat  &  // To set lowest niceness value  
+
+# ps -el | grep cat // To check  niceness value   
+
+# renice -n -20 <pid_of_cat> & // To update niceness value of a process using pid  
+
+
+ 
+ 
+ 
+ 

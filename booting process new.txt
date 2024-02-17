@@ -1,0 +1,281 @@
+Booting Process: 
+=================
+ When we bootup the machine ,it take some time to give us the login prompt,during that period of time the processess
+ which works at the backend to give us the login prompt is called as the booting process.
+ We can boot up our machine by hardware and software too.
+ By pressing the power switch we can boot up the machine by hardware or by giving a command to our machine also
+ can boot up the machine by software.
+
+
+ systemd is the new system and service manager in CentOS/RHEL 7. 
+ It is backward compatible with Sys init scripts used by previous versions of RedHat Linux including RHEL 6. 
+ It replaces Upstart as the default initialization system.
+
+
+ The following steps summarize how the boot procedure happens in RHEL/CentOS 7.
+
+ At first The computer’s BIOS(Basic Input Output System) performs POST(Power On Self Testing).
+ BIOS reads the MBR(Master Boot Record) for the bootloader. The default boot loader in RHEL7 is GRUB2.
+ GRUB 2 bootloader loads the vmlinuz kernel image.
+ GRUB 2 extracts the contents of the initramfs(Initial RAM filesystem) image.
+ The kernel loads driver modules from initramfs.
+ Kernel starts the system’s first process, systemd.
+ The systemd process takes over.
+ It Reads configuration files from the /etc/systemd directory
+ Reads file linked by /etc/systemd/system/default.target
+ Brings the system to the state defined by the system target
+ Executes /etc/rc.local
+
+
+                            RHEL CentOS 7 Boot process (systemd)    
+        _____________________________________________________________________________
+	    |                           POST                                              | 
+	    |            	 (Power-On Self-testing is executed)						  |		 
+        |_____________________________________________________________________________|
+        |                              MBR                                            |
+        |                 selecting the bootable device                               |
+		|-----------------------------------------------------------------------------|
+        |	                             GRUB2                                        |
+		|		           Loads the VMlinuz kernel Image                             |  
+        |                Extracts the content of initramfs iamge                      |
+        |-----------------------------------------------------------------------------|
+        |                            Kernel                                           |
+        |       Loads necessary driver modules from initrd image.                     |
+        |             Starts systems first process systemd.                           |
+        | ----------------------------------------------------------------------------|
+        |                          SYSTEMD                                            |     
+        |   Reads configuration file from the /etc/systemd directory.                 | 
+        |  Reads the file linked by /etc/systemd/system/default.target                |
+        | Brings the system to the state defined the system target.                   |
+       -|---------------------------------------------------------------------------- |		 
+	   
+   1. POST (Power on Self Test)
+  ================================
+      During the boot up process the machine first checks it's hardware,if all are ok then it will proceed further.
+       This is called POST.
+	   
+      From the system firmware, which can be the modern Universal Extended Firmware Interface (UEFI),
+	  or the classical Basic Input Output System (BIOS), the Power-On Self-Test (POST) is executed,
+	  and the hardware that is required to start the system is initialized.	   
+	   
+  2. Selecting the bootable device (With MBR)
+  =============================================
+  
+      Master Boot Record (MBR) is the first 512 bytes of the boot drive that is read into memory by the BIOS.
+      The next 64 bytes contain the partition table for the disk. 
+      The last two bytes are the “Magic Number” which is used for error detection.
+	  
+              ________________________________________________________________________________
+			 |                                               |    PARTITION         |  Magic  |
+			 |        BOOT LOADER (446 bytes)                |      TABLE(64 bytes) |  NUMBER |
+			 |_______________________________________________|______________________|(2 bytes)|
+           /_____________________________________________________________________________________\
+           \============================ MASTER BOOT RECORD 512 BYTES ===========================/
+		    
+
+      MBR discovers the bootable device and loads the GRUB2 boot loader into memory and transfers control over to it.
+	  
+  3. Loading the boot loader (GRUB2)
+  ===================================
+  
+      The default bootloader program used on RHEL 7 is GRUB 2. GRUB stands for GRand Unified Bootloader.
+	  GRUB 2 replaces the older GRUB bootloader also called as legacy GRUB.
+      
+       The GRUB 2 configuration file is located at /boot/grub2/grub.cfg (Do not edit this file directly).
+     The sample file for GRUB2 config file is "/etc/default/grub"
+	 
+  CHANGING THE SPLASH SCREEN TIMMING
+  =====================================
+  
+	 We can edit the boot up timming in that sample "/etc/default/grub" GRUB2 config file. After editing the timming ,
+     We have to update that sample file with original config file.
+	 
+	  # vim  /etc/default/grub // (make the grub timeout timming as much you need i.g-10)
+	  
+	  # wq:
+	  
+ > Now update the sample GRUB2 config file with default file
+ 
+	  #  grub2-mkconfig –o /boot/grub2/grub.cfg
+	  
+	  #  cat  /boot/grub2/grub.cfg | grep -i timeout // (check the file is updated or not)
+	  
+	  # init 6  //(now check the timming you have given to boot up your machine)
+	  
+  4. Loading the kernel
+  =======================
+     
+	  The kernel starts the systemd process with a process ID of 1 (PID 1).
+	  It also loads the necessary driver modules from initrd image.
+	  The boot loader (GRUB2) may present a boot menu to the user, 
+	  or can be configured to automatically start a default operating system.
+	 
+       To  load Linux, the kernel is loaded together with the initramfs.
+       The initramfs contains kernel modules for all hardware that is required to boot,
+       as well as the initial scripts required to proceed to the next stage of booting.
+       On RHEL 7, the initramfs contains a complete operational system (which may be used for troubleshooting purposes).
+	 
+  5. Starting systemd
+  ======================
+  
+      The kernel starts the systemd process with a process ID of 1 (PID 1).
+	  systemd is the first process that starts after the system boots,
+	  and is the final process that is running when the system shuts down.
+	  
+	 It controls the final stages of booting and prepares the system for use.
+	 It also speeds up booting by loading services.
+	 
+	 
+  DEFAULT TARGET UNIT
+  ======================
+  
+	  systemd reads the file linked by "/etc/systemd/system/default.target", to determine the default system target.
+	   The system target file defines the services that systemd starts.
+	   
+	  The default target config file for "cli" is "/usr/lib/systemd/system/multi-user.target".
+	  The  default target config file for "graphical" is "/usr/lib/systemd/system/graphical.target".
+	 
+	  systemd allows you to manage various types of units on a system.
+	  We can see those unit types by the command
+	  
+	      # systemctl -t help
+	  
+	  To see the default target file of your system
+	  
+	  	  #systemctl get-default
+		  
+	  The "graphical.target" target unit indicates that the system is running in a graphical, multi- user state that
+      the system is running in minimal(CLI).
+	  
+
+  CHANGE DEFAULT TARGET UNIT
+  =============================
+  
+     We can change the default target unit, but only in "GRAPHICAL" we can change the unit type into "multi-users". 
+     If we try to do the same process in "MINIMAL" it won't work because of less package and less driver modules.
+   
+   >> commands to change the default target file  
+
+     # systemctl get-default (check the target file)
+	 
+	 # systemctl set-default multi-user.target (change the graphical machine to cli mode permanently )
+	 
+	 # systemctl isolate multi-user.target ( To change from grafical to cli mode temporary)
+ 	 
+	 # init 6 (reboot the machine, it will open in cli format )
+	 
+  >> To return to the default graphical format
+	 
+	 # systemctl set-default graphical.target
+	 
+	 # systemctl isolate multi-user.target
+	 
+	 #init 6
+	 
+  CHANGING PASSWORD OF ROOT IN EMERGENCY IF YOU HAVE FORGOTTEN THE PASSWORD
+  ==============================================================================
+  
+ > Power-on your machine when the splash screen shows your OS version and boot-up timming pause the screen at that time,
+   by pressing the "Esc" key.
+   
+ > Then press "e" for edit
+ 
+ > Then scroll down and go to the line which starts with "linux16", then go the end of that line by pressing "ctrl+e".
+   add "rd.break" in that line.
+   
+ > Then press "ctrl+x" to save that.
+ 
+ > Now emergency mode will open in your machine. Check the mounted /sysroot permission and make it read&write(rw).
+   Because in readonly(ro) mode we can't change password for root.
+ 
+      # mount | grep /sysroot (The temporary root filesystem  will show  "ro"  permission make it "rw" permission )
+ 
+      # mount -o remount,rw /sysroot
+ 
+      # mount | grep /sysroot (check the permission it should show rw ).
+
+ > Now change the root shell into "/sysroot" directory which will appear as "/" for the machine .
+ 
+      # chroot /sysroot
+ 
+ > Now your machine will login as root. To check that press command
+ 
+      # whoami
+	  
+	  # pwd 
+	  
+ > Now you can change password or set a new password for root.
+ 
+      # passwd root
+	  
+ > Now to relabel the new password for root permanently with selinux policy.
+ 
+     # touch /.autorelabel
+   
+ > Now press "ctrl+d" 2 times to come out from the emergency mode. Now the machine will automatically bootup.
+   And you can login to root by giving the new password which is given in emergency mode.
+   
+   
+   HOW TO SET GRUB2 PASSWORD
+   =============================
+ > First we have to create a password for GRUB2. For that follow the below command.
+ 
+   #grub2-mkpasswd-pbkdf2
+   
+ > Now give a password as you want. Now the terminal will show you an encrypted password.
+   Copy that password from grub.pbkdf2.sha512.10000 to the last line of that encrypted password.
+  
+   
+ > Now go inside the "/etc/grub.d" directory.
+  
+  # cd /etc/grub.d
+  
+ > Now press command .
+  
+  #ls
+ 
+ > You will find out a file named "10_linux"
+ 
+ > Open that "10_linux" file in vim editor.
+ 
+  # vim 10_linux
+  
+ > press "shift+g" to go to the last line of that configuration file, and add some parameters as shown below.
+ 
+ cat << EOF
+ set superusers="muna" (you can give any name as super user)
+ password_pbkdf2 muna (paste that copied encrypted password)
+ EOF
+ 
+ wq:
+ 
+ > Now update that given password with original config file, by the help of below command.
+ 
+   #grub2-mkconfig -o /boot/grub2/grub.cfg
+   
+ > Now reboot your machine and check the the grub2 is working or not.
+  
+   # init 6
+
+   
+   HOW TO REMOVE THAT GRUB2 PASSWORD 
+========================================
+ 
+ > To remove GRUB2 password you have to remove those added lines in that config file "10_linux",
+   which is situated under /etc/grub.d config file.
+   
+  # cd /etc/grub.d
+  
+  #vim 10_linux
+  
+ > Now remove those edited lines.
+ 
+ > Now update the 10_linux config file with the original config file "/boot/grub2/grub.cfg"
+
+  # grub2-mkconfig -o /boot/grub2/grub.cfg
+  
+  #init 6
+  
+ > Now check the grub2 it won't ask for user and password anymore.
+ 
+ > if you want to comeback from grub emergency mode press Escape "Esc."
