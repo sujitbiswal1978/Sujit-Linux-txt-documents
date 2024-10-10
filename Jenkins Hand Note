@@ -1,0 +1,236 @@
+                      -: JENKINS :-
+#####################################
+* What is jenkins ?
+ Ans:jenkins is an open-source automation tool used for continous integration and continous delivery(CI/CD).
+It helps developers automate parts of the software development process, including buildiing.testing and deploying code.
+this ensures that software can be delivered quickly and with fewer errors.
+
+
+>> Step to integreate master to salve in jankins :-
+
+
+:---- In master (172.16.16.100)
+====================================
+
+->> Firstly we install java jdk. , set java environment and check java version :-
+
+# yum install java-17-openjdk -y
+# cat > /etc/profile.d/java.sh <<'EOF'
+export JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
+export PATH=$PATH:$JAVA_HOME/bin
+EOF
+# source /etc/profile.d/java.sh
+# java --version
+
+->> Then Add Jenkins Repository
+
+# wget -O /etc/yum.repos.d/jenkins.repo \
+    https://pkg.jenkins.io/redhat-stable/jenkins.repo
+# rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+->> Then Install Jenkins	
+# yum install jenkins -y
+
+ ->> Then start and enable jenkins 
+ # systemctl enable --now jenkins
+ 
+ ->> Check status of jenkins
+# systemctl status jenkins
+
+->> add jenkins port in firewall with enable this . 
+# systemctl enable -- now firewalld
+
+# systemctl status firewalld
+
+# firewall-cmd --permanent --add-port=8080/tcp 
+
+# firewall-cmd  --reload 
+
+# firewall-cmd --list-all
+
+** When we install jenkins at a time automatically a user created "jenkins" . But that user name  login is  nologin "bin/flase" , we modify that to login shell "/bin/bash".
+# usermod -s /bin/bash jenkins
+
+# visudo  // to sudo privilege to jenkins user.
+
+# su - jenkins
+->> then generate ssh key and create "authorized_keys" under "~/.ssh"  folder, and append from salve's "id_rsa.pub". 
+# ssh-keygen
+
+# cat > ~/.ssh/authorized_keys
+
+->> Then login slave through ssh .
+
+# ssh-copy-id  jenkins@172.16.16.101 
+# ssh jenkins@172.16.16.101
+
+:------  Slave (172.16.16.101)
+=================================
+
+>> Firstly we install java jdk. , set java environment and check java version :-
+
+# yum install java-17-openjdk -y
+# cat > /etc/profile.d/java.sh <<'EOF'
+export JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
+export PATH=$PATH:$JAVA_HOME/bin
+EOF
+# source /etc/profile.d/java.sh
+# java --version
+
+>> Create a user and set password and give sudo privilege
+# useradd jenkins 
+# passwd jenkins
+#visudo
+
+>> switch to that user 
+# su - jenkins
+
+>> Then generate key and copy-id to salve node.
+# ssh-keygen
+# ssh-copy-id jenkins@172.16.16.101
+
+>> Then login this .
+# ssh jenkins@172.16.16.101
+
+**- Then go to brower at search the master url .
+172.16.16.100:8080
+
+>> when open jenkins page we enter password to login {this password is stored under "/var/lib/jenkins/secrets/initialAdminPassword"}.
+ 
+ >> go to cli master node and paster that "/var/lib/jenkins/secrets/initialAdminPassword", it will be show a random password copy that and paste in jenkins page .
+ 
+ >> Then install plugins , when all plugins installed then "user page" open then we  type "skip and continue as admin" option 
+ >>  Then we get instance configuration page and it show my jenkins  master url (172.16.16.100:8080) , then start jenkins
+ 
+ >> when we enter jenkins page go to where right corner where write "admin" and tap and go to configure option and scrool down where write password and change that and again login .
+ 
+ 
+ >> Then create a new node .
+ 
+:- Go to "Deshboard" and  go to "manage jenkins" go to "Nodes" and create a 
+:-  give node name and select permanent agent
+:-  we get node page then and set the paramiters 
+:-  give description(optional) 
+:- give number of excuterors(that define how many jobs we wann to run)
+:- give remote root directory (salve node normal user "/home/jenkins")
+:- give labels (one type of tag) 
+:- usage (age much as possible)
+:- Launch Method (via ssh)
+:- Availability (Keep this agent as much as possible)
+:- Put hostname & salve ip 
+:- Add credential 
+-- Tap add option & select jenkins 
+--  Domain (Global Credentials)
+-- Kind (SSH Username with private key)
+-- Scope (Global)
+-- Id (Any id name)
+-- Description (Any Description)
+-- Username (Any Username)
+-- Select Private Key & Select Enter directly(slave's) 
+-- Then Add 
+ 
+:- Then save it.
+
+>> Then create job to run 
+:- Go to Deshboard and select new item 
+:- Then enter job/item name 
+:- Select Freestyle project, then click "OK" 
+**we enter in job page in this page there are difference paramiters to select to run job properly. 
+:- write any description(optional)
+:- below description select only one option (Restrict where this project can be run)
+:- Then put node's label 
+:- Then scroll down and select Build Steps's down and select "execute shell"
+:- Then type any command to run (ex:- sudo mkdir dir {1..20})
+:- Then apply and save 
+
+>> To run job 
+:- Go to job option and see where "Build Now "
+:- Then see under "Build history" that job run or not 
+:- This job procces is showing in "Build History" and when job successfully (green sign) , unsuccessfully (red sign)
+:- Tap on this sign and it automatically redirect to console page and see job's status 
+
+** The job's output is stored in salve node in cli machine "/home/jenkins/workspace/"
+
+!! There are Three different ways to integreate slave to git :-
+1> Username & Token 
+2> SSH & private key 
+3> Webhook
+
+
+1> Username & Token
+##################################
+
+>> Firstly  create a repo in github 
+
+>> Then generate a token in github
+:- Go to profile settings -> settings -> delevoper settings -> Personal access token(classic) -> Generate token (classic) -> tap title name -> select all options -> Generate Token
+
+:- Tap that repo in git hub which we recent created  and tab above "code" and then copy https link (https://github.com/sujitbiswal1978/sujit-dummy.git)
+:- Then go to jenkins page and create job 
+:- Give description, and select below last option (Restrict where this project can be run)
+:- Put label
+:- Then Source Code Management and select GIT 
+:- Then paste url which we copy git repo's https link 
+:-  Add credential 
+-- Tap add option & select jenkins 
+--  Domain (Global Credentials)
+-- Kind (Username With password)
+-- Scope (Global)
+-- Username (Any Username)
+-- password (Git Token)
+-- Id (Any Id)
+-- Description(Any Description)
+-- Then Add 
+:- Then scroll down and select Build Steps's down and select "execute shell"
+:- Then type any command to run (ex:- sudo mkdir dir {1..20})
+:- Then apply and save
+
+
+2> SSH & private key 
+##################################
+:- Firstly we add ssh public key to "SSH & GPG Keys"
+:-  Git profile settings -> settings -> SSH & GPG Keys -> new SSH key (salve's)
+:-Then go to repo which we wann to integreate and tap "code" and copy thorough ssh url 
+:- Then go to jenkins page and create job 
+ :-Give description, and select below last option (Restrict where this project can be run)
+:- Put label
+:- Then Source Code Management and select GIT 
+:- Then paste url which we copy git repo's https link 
+:-  Add credential 
+-- Tap add option & select jenkins 
+--  Domain (Global Credentials)
+-- Kind (SSH Username with private key)
+-- Scope (Global)
+-- Id (Any id name)
+-- Description (Any Description)
+-- Username (Any Username)
+-- Select Private Key & Select Enter directly(salve's) 
+-- Then Create
+:- Then Add 
+
+>> In jenkins page we get error that is ssh authentication error:-
+
+>> How to resolve the SSH host key verification issue and successfully connect to the GitHub repository from Jenkins.
+
+ >> Manually Add GitHub's SSH Key to Known Hosts
+ 
+ Add the Key to Known Hosts:
+
+Open the known_hosts file on the Jenkins server. This file is typically located at ~/.ssh/known_hosts for the user running Jenkins.
+
+#ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts  (execute both master and slave)
+**
+The command "ssh-keygen -t ed25519 github.com >> ~/.ssh/known_hosts", is used to add the SSH host key of "github.com" to your local SSH known hosts file.
+This is a security measure to ensure that your SSH client recognizes and trusts the server it is connecting to.
+
+>> Verify the Connection
+Try connecting to the GitHub repository again from Jenkins to see if the issue is resolved. You can test this manually from the slave server:
+
+
+# git ls-remote -h git@github.com:sujitbiswal1978/<repo name>.gitHEAD     {we also get this url from jenkins page}
+
+>>Test your SSH connection:
+
+# ssh -T git@github.com
+
+This should no longer give you the host key verification error if the key is correctly added to the known_hosts file.

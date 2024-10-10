@@ -1,0 +1,82 @@
+**Jenkins master to slave integration via ssh , where host machine is master and container is slave .
+
+>> Root user on host machine :-
+
+[root@rolex docker]# 
+#  mkdir docker
+# cd docker
+# vim Dockerfile (Docker-file for jenkins.txt)
+# yum install -y yum-utils
+# yum-config-manager --add-repo HTTPS://DOWNLOAD.DOCKER.COM/LINUX/CENTOS/DOCKER-CE.REPO
+# yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+# yum install git -y 
+# yum -y install java-17-openjdk java-17-openjdk-devel 
+# cat > /etc/profile.d/java.sh <<'EOF'
+export JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(which java)))))
+export PATH=$PATH:$JAVA_HOME/bin
+EOF
+# source /etc/profile.d/java.sh
+# java --version 
+#  systemctl enable --now docker
+# systemctl status docker 
+#  docker pull jenkins/jenkins:lts-jdk17 (optional)
+# docker build -t jenkins:v1 .
+# useradd jenkins
+# passwd jenkins 
+# visudo 
+# chmod  777 /var/run/docker.sock
+#  usermod -aG docker jenkins
+# docker network create --driver bridge --subnet 192.168.1.0/24 --gateway 192.168.1.1   my_custom_network
+# docker run -d --name my_jenkins --network my_custom_network -p 8080:8080 -p 50000:50000 jenkins:v1
+#  docker logs -f my_jenkins
+# docker inspect my_jenkins
+# docker exec -it my_jenkins
+
+>> Go to container as jenkins user :- 
+
+jenkins@f83c3ebf9543:/$ su - root
+# service ssh start
+# service ssh status
+# ps -aux (make sure sshd service running or not)
+# ctrl+ pq
+ 
+>> Host machine root user:-
+
+[root@rolex docker]
+# ssh root@192.168.1.2
+#  ssh jenkins@192.168.1.2
+#  su - jenkins
+
+>> Host Machine jenkins user :- 
+
+[jenkins@rolex ~]
+$ ssh-keygen
+$ ssh-copy-id root@192.168.1.2
+$ ssh root@192.168.1.2
+$ ssh-copy-id jenkins@192.168.1.2
+$  ssh-copy-id jenkins@172.16.16.100
+$ ssh jenkins@172.16.16.100
+$  docker exec -it my_jenkins bash
+
+>> Go to container as jenkins user :-
+
+jenkins@f83c3ebf9543:/ 
+$ ssh-keygen
+$  ssh-copy-id jenkins@192.168.1.2
+$  ssh-copy-id jenkins@172.16.16.100
+$  ssh-copy-id root@172.16.16.100
+$  ssh jenkins@172.16.16.100
+$  su - root
+
+>> Go to container as root user :- 
+
+root@f83c3ebf9543:~
+# ssh jenkins@172.16.16.100
+#  ssh-keygen
+# ssh-copy-id root@192.168.1.2
+ctrl+pq
+
+>> Then search master(host machine) ip and access  jenkins 
+:- manage jenkins -> create node -> enter executors -> remote root (/home/jenkins) -> labels(master)  -> launch method (ssh) -> put master node ip (172.16.16.100) -> add credential -> then add -> save 
+>> save and run and check log 
+ 

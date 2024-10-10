@@ -1,0 +1,38 @@
+# Use an official Jenkins image
+FROM jenkins/jenkins:lts-jdk17
+
+# Prevent interactive promt during package installations
+ENV DEBIAN_FRONTED=noninteractive
+
+USER root
+# Update the package list and install SSH server
+RUN apt-get update && apt-get install -y \
+    openssh-server iproute2 iputils-ping \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a directory for the SSH daemon to run
+RUN mkdir /var/run/sshd
+
+# Set the root password (change 'rootpassword' to something secure)
+RUN echo 'root:admin' | chpasswd
+
+RUN echo 'jenkins:admin' | chpasswd
+
+
+# Ensure SSH host keys are generated
+RUN ssh-keygen -A
+
+# Allow root login by removing the 'prohibit-password' option
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+# Disable PAM (Pluggable Authentication Modules) to avoid login issues
+RUN sed -i 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' /etc/pam.d/sshd
+
+# Expose necessary ports
+EXPOSE 8080 50000 22
+
+# Start both SSH service and Jenkins
+CMD ["/bin/bash", "-c", "service ssh start && /usr/local/bin/jenkins.sh"]
+
+USER jenkins
+

@@ -1,0 +1,22 @@
+
+
+>> How to resolve the SSH host key verification issue and successfully connect to the GitHub repository from Jenkins.
+
+ >> Manually Add GitHub's SSH Key to Known Hosts
+ 
+ Add the Key to Known Hosts:
+
+Open the known_hosts file on the Jenkins server. This file is typically located at ~/.ssh/known_hosts for the user running Jenkins.
+
+
+#ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
+
+
+4. Verify the Connection
+Try connecting to the GitHub repository again from Jenkins to see if the issue is resolved. You can test this manually from the Jenkins server:
+
+
+# git ls-remote -h git@github.com:sujitbiswal1978/sujit-xyz.git HEAD
+
+This should no longer give you the host key verification error if the key is correctly added to the known_hosts file.
+

@@ -1,0 +1,130 @@
+Q> What is Sonarqube ? And what are its use in real time?
+Ans:- 
+->SonarQube is an open-source platform used for continuous inspection of code quality.
+-> It performs automatic reviews with static analysis of code to detect bugs, code smells, and security vulnerabilities.
+ 
+ ->Here are its uses in real-time:
+ 
+(a)Code Quality Assessment: Continuously analyzes code to ensure adherence to coding standards.
+
+(b)Bug Detection:- Identifies potential bugs and issues in the code early in the development process.
+
+(c)Security Vulnerabilities:-Detects security flaws and vulnerabilities to enhance application security.
+
+(d)Code Smells:- Highlights areas of the code that might be improved for better readability and maintainability.
+
+(e)Technical Debt Management:- Helps in measuring and managing technical debt by providing detailed reports and metrics.
+
+(f)Integrations:-Integrates with various CI/CD tools like Jenkins, GitHub Actions, and others for seamless workflows.
+
+(g)Multi-language Support:- Supports multiple programming languages, making it versatile for different projects.
+
+(h)Visualization:- Offers dashboards and visualization tools to track code quality metrics over time.
+
+Q> Why we use Sonarqube ?
+Ans:-
+->We use SonarQube to ensure high code quality and maintainability in software projects. It automates the process of detecting bugs, code smells,
+-> and security vulnerabilities, allowing developers to address issues early. By integrating with CI/CD pipelines,
+-> SonarQube provides continuous feedback, helping teams manage technical debt, adhere to coding standards, and ultimately deliver more reliable, secure, and maintainable software.
+
+-->> Sonarqube's default database is "H2".
+
+-->> STEPS TO SETUP SONARQUBE (CENTOS 9):-
+
+:- Create a user "sonar"& and give a passwd .
+# useradd sonar
+# passwd sonar 
+:- Then give sudo privilege to that(sonar) user.
+#visudo 
+
+:- Install and Setup PostgreSQL 15Database For SonarQube
+
+>> Install the  postgresql repository RPM :-
+# yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+
+>> Disable the built-in PostgreSQL module:
+# dnf -qy module disable postgresql
+
+>>Install PostgreSQL 15:
+# dnf install -y postgresql15-server
+
+>>Optionally initialize the database and enable automatic start:
+# /usr/pgsql-15/bin/postgresql-15-setup initdb
+# systemctl enable postgresql-15
+# systemctl start postgresql-15
+
+-- When we install postgresql by default a normal user created (postgres) 
+
+>> Then give the password to postgres user.
+# passwd postgres
+
+>> Switch to postgres user.
+# su - postgres
+
+>> Enter into postgresql data base 
+# psql 
+
+--Into that database.
+
+:- Create database 
+#CREATE DATABASE sonarqube;
+ 
+ :- Create user(sonar) and set password
+ # create user sonar with enrypted password 'sonar';
+ 
+ :- Then give all privilege to database and user
+# grant all privileges on database sonarqube to sonar ;
+
+:- Give owner "sonar" to database "sonarqube"
+# alter database sonarqube owner to sonar ;
+ 
+:- Then quit database
+# exit 
+
+>> change the directory 
+#  cd /opt
+
+>> Download sonaqube installer files archive To download latest version of visit SonarQube download page.
+# wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.1.0.47736.zip
+
+>> Unzip the archive setup to that directory 
+# unzip sonarqube-9.1.0.47736.zip 
+
+>> Then rename this sonarqube zip file to sonarqube"
+# mv /opt/sonarqube-9.1.0.47736 /opt/sonarqube
+
+>> Then set sonaqube folder's user owner& group owner to "sonar" user
+#  chown -R sonar:sonar /opt/sonarqube
+
+>>  Open the SonarQube configuration file using your favorite text editor.
+# vim /opt/sonarqube/conf/sonar.properties
+-- Go to line numer 18,19 and uncomment those lines and ,
+-> sonar.jdbc.username=sonar
+-> sonar.jdbc.password=<userpassword***>
+:wq
+
+>>  Edit the sonar script file and set RUN_AS_USER
+# vim /opt/sonarqube/bin/linux-x86-64/sonar.sh
+-- Go to 49 line and uncomment that line and ,
+-> RUN_AS_USER=sonar
+
+>> Move to the script directory
+# cd /opt/sonarqube/bin/linux-x86-64/
+
+>> Run the script to start SonarQube
+# ./sonar start 
+
+>> To check if sonaqube is running 
+# ./sonar status
+
+
+>> To rename sonar log file name 
+#  mv /opt/sonarqube/logs/sonar.20240803.log /opt/sonarqube/logs/sonar.log
+ 
+ 
+ >> Then go to browser and search <server ip :9000>
+>> we get sonarqube page
+-- default user :- admin
+-- default user :- admin
+
+#################################################################################################

@@ -1,0 +1,44 @@
+To add visible indent lines in vim editor (like :- VScode or PYcharm)
+ 
+ 
+ >> To install vim plugin
+ 
+ # curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+
+ >> Go to .vimrc file and paste those below contents:-
+ 
+# vim ~/.vimrc 
+ 
+call plug#begin('~/.vim/plugged')
+
+" Plugin installation lines
+Plug 'Yggdroot/indentLine'  " IndentLine plugin
+
+call plug#end()
+let g:indentLine_enabled = 1
+
+set ai
+set sw=2
+set ts=2
+set et
+
+
+:wq (Save & Quit)
+
+
+
+>> Once again go to .vimrc file and go to exit mode and install plugin & update.
+
+# vim ~/.vimrc
+
+:PlugInstall (enter) // To install plugin under .vimrc file
+
+
+:source ~/.vimrc    // To update .vimrc file
+
+
+>>Verify Plugin Installation or not.
+
+# ls ~/.vim/plugged/
